@@ -6,7 +6,8 @@
 
 - link:
     ~/.dotfiles: ''
-    ~/.bash_profile: bash_profile
+    ~/.bash_profile: files/bash_profile
+    ~/.hammerspoon: files/hammerspoon
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
