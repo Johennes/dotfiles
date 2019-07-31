@@ -11,8 +11,12 @@
     - [test -d ~/.bash_completion.d || mkdir -p ~/.bash_completion.d, Creating Bash completion user directory]
 
 - link:
+    # Backlink
     ~/.dotfiles: ''
+    # Dot files
     ~/.bash_profile: files/bash_profile
+    ~/.gitconfig: files/gitconfig
     ~/.gitignore_global: files/gitignore_global
     ~/.hammerspoon: files/hammerspoon
+    # Completion
     ~/.bash_completion.d/nuke: completion/nuke

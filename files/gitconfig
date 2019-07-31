@@ -1,0 +1,16 @@
+[user]
+	name = Johannes Marbach
+[pull]
+	rebase = true
+[push]
+	default = simple
+[alias]
+	f = fetch
+	ud = log ..@{u}
+	l = log --graph --decorate
+	c = checkout
+	s = status
+[core]
+	excludefile = ~/.gitignore_global
+[include]
+	path = ~/.gitconfig_local
