@@ -1,3 +1,0 @@
-#!/bin/bash
-
-find ~/Desktop \( -name "Screenshot*" -o -name "Simulator Screen Shot*" \) -exec rm -v "{}" \;

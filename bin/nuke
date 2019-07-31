@@ -1,0 +1,19 @@
+#!/bin/bash
+
+case "$1" in
+    derived-data)
+        rm -rf ~/Library/Developer/Xcode/DerivedData
+        ;;
+    provisioning-profiles)
+        rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*
+        ;;
+    screenshots)
+        find ~/Desktop \( -name "Screenshot*" -o -name "Simulator Screen Shot*" \) -exec rm -fv "{}" \;
+        ;;
+    trash)
+        rm -rf ~/.Trash/*
+        ;;
+    *)
+        echo "Nothing to nuke! (╯°□°)╯︵┻━┻"
+        ;;
+esac

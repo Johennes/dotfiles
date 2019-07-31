@@ -2,12 +2,16 @@
     link:
       relink: true
 
-- clean: ['~']
+- clean:
+    - '~'
+    - ~/.bash_completion.d
+
+- shell:
+    - [git submodule update --init --recursive, Installing submodules]
+    - [test -d ~/.bash_completion.d || mkdir -p ~/.bash_completion.d, Creating Bash completion user directory]
 
 - link:
     ~/.dotfiles: ''
     ~/.bash_profile: files/bash_profile
     ~/.hammerspoon: files/hammerspoon
-
-- shell:
-  - [git submodule update --init --recursive, Installing submodules]
+    ~/.bash_completion.d/nuke: completion/nuke

@@ -11,3 +11,7 @@ export PATH=$(python3 -c "import site; print(site.USER_BASE)")/bin:${PATH}
 export PATH=$(ruby -e "puts Gem.user_dir")/bin:${PATH}
 
 export PIPENV_VENV_IN_PROJECT=1
+
+for file in ~/.bash_completion.d/*; do
+    [[ -f "${file}" ]] && source "${file}"
+done
