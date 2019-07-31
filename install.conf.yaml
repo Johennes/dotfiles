@@ -13,5 +13,6 @@
 - link:
     ~/.dotfiles: ''
     ~/.bash_profile: files/bash_profile
+    ~/.gitignore_global: files/gitignore_global
     ~/.hammerspoon: files/hammerspoon
     ~/.bash_completion.d/nuke: completion/nuke
