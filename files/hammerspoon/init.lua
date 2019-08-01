@@ -98,37 +98,3 @@ hs.hotkey.bind(hyper, "j",hs.hints.windowHints)
 hs.hotkey.bind(hyper, "t", function()
   hs.urlevent.openURL("https://www.dict.cc/?s=")
 end)
-
-
-
-
-
-
--- Expose
-
---expose = hs.expose.new(nil, {showThumbnails=true})
---hs.hotkey.bind({"cmd", "alt", "ctrl", "shift"}, 'j', 'Expose',function()
---  expose:toggleShow()
---end)
-
-
---hs.hotkey.bind({"cmd", "alt", "ctrl", "shift"}, "t", function()
---  hs.urlevent.openURL("https://www.dict.cc/?s=")
---end)
-
-
---eventtapOtherMouseDown = hs.eventtap.new({ hs.eventtap.event.types.leftMouseUp }, function(event)
---    	hs.urlevent.openURL("https://www.dict.cc/?s=")
---	eventtapOtherMouseDown:stop()
---        return true
---end)
---
---eventtapOtherMouseDown:start()
-
---a = hs.application
---u = hs.uielement
-
---hs.hotkey.bind(hyper, "t", function()
---      local elem = hs.uielement.focusedElement()
---      local selected = elem:selectedText()
---     hs.alert.show("Elem: " .. selected)
