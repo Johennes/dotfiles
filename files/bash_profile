@@ -15,3 +15,5 @@ export PIPENV_VENV_IN_PROJECT=1
 for file in ~/.bash_completion.d/*; do
     [[ -f "${file}" ]] && source "${file}"
 done
+
+[[ -f ~/.bash_profile_local ]] && source ~/.bash_profile_local
