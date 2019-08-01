@@ -1,0 +1,88 @@
+#!/bin/bash
+
+if [[ ! -d "${APPSTORE_REPO}" ]]; then
+    echo "Error: APPSTORE_REPO environment variable not set"
+    exit 1
+fi
+
+titles=(
+    'KAYAK :kayak:'
+    'momondo :momondo:'
+    'Cheapflights :cf:'
+    'SWOODOO :swoo:'
+    'checkfelix :felix:'
+    'Mundi :mundi:'
+)
+
+notes=(
+    "$(cat ${APPSTORE_REPO}/iOS/KAYAK/metadata/en-US/release_notes.txt)"
+    "$(cat ${APPSTORE_REPO}/iOS/momondo/metadata/en-US/release_notes.txt)"
+    "$(cat ${APPSTORE_REPO}/iOS/Cheapflights/metadata/en-US/release_notes.txt)"
+    "$(cat ${APPSTORE_REPO}/iOS/SWOODOO/metadata/en-US/release_notes.txt)"
+    "$(cat ${APPSTORE_REPO}/iOS/Checkfelix/metadata/en-US/release_notes.txt)"
+    "$(cat ${APPSTORE_REPO}/iOS/Mundi/metadata/en-US/release_notes.txt)"
+)
+
+function join {
+    local d=" / "; echo -n "$1"; shift; printf "%s" "${@/#/$d}";
+}
+
+function group_release_notes {
+    handled=()
+
+    function is_handled {
+        for e in "${handled[@]}"; do
+            if [[ "$e" == "$1" ]]; then
+                return 0
+            fi
+        done
+        return 1
+    }
+
+    for i in "${!notes[@]}"; do
+        if $(is_handled $i); then
+            continue
+        fi
+
+        matches=( "${titles[$i]}" )
+        handled+=( i )
+
+        for j in "${!notes[@]}"; do
+            if [[ $j -le $i ]] || $(is_handled $j); then
+                continue
+            fi
+            if [[ "${notes[$i]}" == "${notes[$j]}" ]]; then
+                matches+=( "${titles[$j]}" )
+                handled+=( $j )
+            fi
+        done
+
+        if [[ ${#matches} != ${#titles} ]]; then
+            join "${matches[@]}"
+            echo
+        fi
+
+        echo "\`\`\`"
+        echo "${notes[$k]}"
+        echo "\`\`\`"
+        echo
+    done
+}
+
+echo "@channel: Version x.x.x of the iOS app for $(join "${titles[@]}") has been released on the app store."
+echo
+echo "*Official Release Notes*"
+echo
+echo $(group_release_notes)
+echo
+echo "*Other Noteworthy Changes*"
+echo
+echo "\`\`\`"
+echo "-"
+echo "\`\`\`"
+echo
+echo "*Special Thanks*"
+echo
+echo "@..."
+echo
+echo "This release was brought to you by our current _Release Captain_ @...! :shipitparrot:"
