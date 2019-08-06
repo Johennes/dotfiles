@@ -62,9 +62,7 @@ function group_release_notes {
             echo
         fi
 
-        echo "\`\`\`"
         echo "${notes[$k]}"
-        echo "\`\`\`"
         echo
     done
 }
@@ -77,12 +75,12 @@ echo $(group_release_notes)
 echo
 echo "*Other Noteworthy Changes*"
 echo
-echo "\`\`\`"
 echo "-"
-echo "\`\`\`"
 echo
 echo "*Special Thanks*"
 echo
-echo "@..."
+echo "- @..."
+echo
+echo "As usual, thanks to everyone else who helped make this release happen as well!"
 echo
 echo "This release was brought to you by our current _Release Captain_ @...! :shipitparrot:"
