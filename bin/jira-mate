@@ -1,0 +1,466 @@
+#!/usr/bin/env python3
+
+from base64 import b64decode, b64encode
+import datetime
+import re
+import readline
+import requests
+import json
+import os
+import traceback
+import yaml
+
+
+# Configuration
+
+class Configuration(object):
+
+    def __init__(self):
+        with open(os.path.join(os.path.expanduser("~"), ".jira-mate.yaml"), "r") as stream:
+            config = yaml.safe_load(stream)
+
+            if "connection" not in config:
+                raise Exception("No connection section in configuration")
+            connection = config["connection"]
+
+            if "host" not in connection:
+                raise Exception("No connection.host setting in configuration")
+            self.host = connection["host"]
+
+            if "user" not in connection:
+                raise Exception("No connection.user setting in configuration")
+            if "pass" not in connection:
+                raise Exception("No connection.pass setting in configuration")
+            self.credential = b64encode(b64decode(connection["user"])
+                + b":" + b64decode(connection["pass"])).decode("ascii")
+
+            if "board" not in config:
+                raise Exception("No board section in configuration")
+            board = config["board"]
+
+            if "id" not in board:
+                raise Exception("No board.id setting in configuration")
+            self.board_id = board["id"]
+
+            if "sprints" not in board:
+                raise Exception("No board.sprints section in configuration")
+            sprints = board["sprints"]
+
+            if "regular" not in sprints:
+                raise Exception("No board.sprints.regular setting in configuration")
+            if not isinstance(sprints["regular"], list):
+                raise Exception("Malformed board.sprints.regular setting in configuration")
+            self.regular_sprint_ids = sprints["regular"]
+
+            if "bucketing" not in sprints:
+                raise Exception("No board.sprints.bucketing setting in configuration")
+            if not isinstance(sprints["bucketing"], list):
+                raise Exception("Malformed board.sprints.bucketing setting in configuration")
+            self.bucketing_sprint_ids = sprints["bucketing"]
+
+            if "review" not in sprints:
+                raise Exception("No board.sprints.review setting in configuration")
+            self.review_sprint_id = sprints["review"]
+
+
+# Networking
+
+class NetworkClient(object):
+
+    def __init__(self, host, headers):
+        self.host = host
+        self.headers = headers
+
+    def get(self, path, **kwargs):
+        response = requests.get(f"{self.host}{path}" , headers = self.headers, **kwargs)
+        if not response:
+            raise Exception(response.text)
+        return response
+
+    def post(self, path, **kwargs):
+        response = requests.post(f"{self.host}{path}", headers = self.headers, **kwargs)
+        if not response:
+            raise Exception(response.text)
+        return response
+
+    def put(self, path, **kwargs):
+        response = requests.put(f"{self.host}{path}", headers = self.headers, **kwargs)
+        if not response:
+            raise Exception(response.text)
+        return response
+
+
+# Jira API Client
+
+class JiraClient(NetworkClient):
+
+    def __init__(self, host, headers, board_id):
+        super().__init__(host, headers)
+        self.board_id = board_id
+
+    def get_tickets_in_backlog(self):
+        print("Retrieving tickets in backlog...")
+        response = self.get(f"/rest/agile/1.0/board/{self.board_id}/backlog")
+        return [Ticket(json) for json in response.json()["issues"]]
+
+    def get_tickets_in_sprint(self, sprint):
+        print(f"Retrieving all tickets in sprint {sprint.name} ({sprint.id})...")
+        response = self.get(f"/rest/agile/1.0/sprint/{sprint.id}/issue?startAt=0&maxResults=200")
+        return [Ticket(json) for json in response.json()["issues"]]
+
+    def move_tickets_to_sprint(self, sprint, keys):
+        print(f"Moving {len(keys)} ticket(s) to sprint {sprint.name} ({sprint.id})")
+        self.post(f"/rest/agile/1.0/sprint/{sprint.id}/issue", json = { "issues": keys })
+
+    def rank_tickets(self, tickets, before):
+        self.put("/rest/agile/1.0/issue/rank", json = { "issues": tickets, "rankBeforeIssue": before })
+
+    def update_sprint(self, sprint, name, start_date, end_date):
+        print(f"Updating sprint {sprint.name} ({sprint.id})...")
+        self.post(f"/rest/agile/1.0/sprint/{sprint.id}",
+            json = { "name": name, "startDate": start_date, "endDate": end_date })
+
+    def create_sprint(self, name, start_date, end_date):
+        print(f"Creating sprint {name} ({start_date} – {end_date})...")
+        response = self.post("/rest/agile/1.0/sprint",
+            json = { "name": name, "startDate": start_date, "endDate": end_date, "originBoardId": self.board_id })
+        id = response.json()["id"]
+        print(f"Sprint ID: {id}")
+
+    def get_sprint(self, id):
+        print(f"Loading sprint {id}...")
+        response = self.get(f"/rest/agile/1.0/sprint/{id}")
+        return Sprint(response.json())
+
+    # WIP
+    def get_all_sprints(self):
+        print("Retrieving all sprints from board...")
+
+        response = self.get(f"/rest/agile/1.0/board/{self.board_id}/sprint?startAt=0&maxResults=200")
+
+        result = []
+        for value in response.json()["values"]:
+            if value["state"] == "closed":
+                continue
+            result.append(Sprint(value["id"], value["name"]))
+            print(result[-1].name)
+
+        print(result)
+
+
+# Data Structures
+
+class Sprint(object):
+
+    def __init__(self, json):
+        self.id = json["id"]
+        self.name = json["name"]
+        if "startDate" in json:
+            self.start_date = json["startDate"]
+        if "endDate" in json:
+            self.end_date = json["endDate"]
+        self.state = json["state"]
+
+
+class Ticket(object):
+
+    def __init__(self, json):
+        self.key = json["key"]
+        self.priority = json["fields"]["priority"]["name"]
+        if json["fields"]["assignee"]:
+            self.assignee = json["fields"]["assignee"]["displayName"]
+        self.resolution = json["fields"]["resolution"]
+
+
+# Collecting Tickets for Review
+
+class CollectTicketsForReviewAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Collect tickets for review"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        keys = [t.key for t in self.client.get_tickets_in_backlog()]
+        if keys:
+            sprint = self.client.get_sprint(self.configuration.review_sprint_id)
+            self.client.move_tickets_to_sprint(sprint, keys)
+            print_ok("%i tickets moved to %s" % (len(keys), sprint.name))
+        else:
+            print_ok("No new tickets found")
+
+
+# Ranking Sprints
+
+class RankSprintsAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Rank sprints"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        regular_sprints = [self.client.get_sprint(i) for i in self.configuration.regular_sprint_ids]
+        bucketing_sprints = [self.client.get_sprint(i) for i in self.configuration.bucketing_sprint_ids]
+        self.pick_group_and_sprints_and_sort(regular_sprints, bucketing_sprints)
+
+    def pick_group_and_sprints_and_sort(self, regular_sprints, bucketing_sprints):
+
+        print("––– Available Bucketing Sprints –––")
+        for item in enumerate(bucketing_sprints):
+            print(" a-%i) %s (%s)" % (item[0] + 1, item[1].name, item[1].id))
+        print()
+        print("––– Available Regular Sprints –––")
+        for item in enumerate(regular_sprints):
+            print(" b-%i) %s (%s)" % (item[0] + 1, item[1].name, item[1].id))
+        print()
+
+        answer = input("In what group do you want to sort? [a/b/x] ")
+
+        if answer == "a":
+            self.pick_sprints_and_sort_with_method(bucketing_sprints, self.sort_bucketing_sprint)
+        elif answer == "b":
+            self.pick_sprints_and_sort_with_method(regular_sprints, self.sort_regular_sprint)
+        elif answer == "x":
+            self.sort_sprints_with_methods(bucketing_sprints, [self.sort_bucketing_sprint] * len(bucketing_sprints))
+            self.sort_sprints_with_methods(regular_sprints, [self.sort_regular_sprint] * len(regular_sprints))
+
+    def pick_sprints_and_sort_with_method(self, sprints, method):
+        answer = input("What sprint do you want to sort? [1-%i/x] " % len(sprints))
+
+        if answer == "x":
+            self.sort_sprints_with_methods(sprints, [method] * len(sprints))
+            return
+
+        try:
+            number = int(answer)
+        except ValueError:
+            return
+
+        if not number or number < 1 or number > len(sprints):
+            return
+
+        self.sort_sprints_with_methods([sprints[number - 1]], [method])
+
+    def sort_sprints_with_methods(self, sprints, methods):
+        for item in zip(sprints, methods):
+            item[1](item[0])
+
+    def sort_bucketing_sprint(self, sprint):
+        print("Sorting tickets...")
+
+        tickets = []
+        total = 0
+
+        for ticket in self.client.get_tickets_in_sprint(sprint):
+            if ticket.resolution:
+                continue
+
+            index = next((i for i in range(0, len(tickets)) if tickets[i].priority > ticket.priority), len(tickets))
+            tickets.insert(index, ticket)
+            total += 1
+
+        print("Ranking tickets...", end = "", flush = True)
+
+        ranked_tickets = []
+
+        for ticket in reversed(tickets):
+            count = len(ranked_tickets) + 1
+            percentage = count / total * 100
+            print(f"\rRanking Tickets... {count}/{total} [{percentage:.0f}%]", end = "", flush = True)
+
+            if ranked_tickets:
+                self.client.rank_tickets([ticket.key], ranked_tickets[-1])
+
+            ranked_tickets.append(ticket.key)
+
+        print()
+
+
+    def sort_regular_sprint(self, sprint):
+        print("Sorting tickets...")
+
+        tickets = {}
+        total = 0
+
+        for ticket in self.client.get_tickets_in_sprint(sprint):
+            if ticket.assignee not in tickets:
+                tickets[ticket.assignee] = []
+
+            index = next((i for i in range(0, len(tickets[ticket.assignee])) if tickets[ticket.assignee][i].priority > ticket.priority), len(tickets[ticket.assignee]))
+            tickets[ticket.assignee].insert(index, ticket)
+            total += 1
+
+        print("Ranking tickets...", end = "", flush = True)
+
+        ranked_tickets = []
+
+        for assignee in reversed(sorted(tickets.keys())):
+            for ticket in reversed(tickets[assignee]):
+                count = len(ranked_tickets) + 1
+                percentage = count / total * 100
+                print(f"\rRanking Tickets... {count}/{total} [{percentage:.0f}%]", end = "", flush = True)
+
+                if ranked_tickets:
+                    self.client.rank_tickets([ticket.key], ranked_tickets[-1])
+
+                ranked_tickets.append(ticket.key)
+
+        print()
+
+
+# Updating Sprints
+
+class UpdateSprintAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Update sprint"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        sprints = [self.client.get_sprint(i) for i in self.configuration.regular_sprint_ids]
+        sprint = self.pick_sprint(sprints)
+        if not sprint:
+            return
+
+        name = input_with_prefill("New name: ", sprint.name)
+        start_date = input_with_prefill("New start date: ", sprint.start_date)
+        end_date = input_with_prefill("New end date: ", sprint.end_date)
+
+        client.update_sprint(sprint, name, start_date, end_date)
+
+    def pick_sprint(self, sprints):
+        print("––– Available Sprints –––")
+        for item in enumerate(sprints):
+            print(" %i) %s (%s) %s – %s" % (item[0] + 1, item[1].name, item[1].id, item[1].start_date, item[1].end_date))
+        print()
+
+        answer = input("What sprint do you want to update? [1-%i] " % len(sprints))
+
+        try:
+            number = int(answer)
+        except ValueError:
+            return
+
+        if not number or number < 1 or number > len(sprints):
+            return
+
+        return sprints[number - 1]
+
+
+# Creating Sprints
+
+class CreateSprintAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Create new sprint"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        last = self.client.get_sprint(self.configuration.regular_sprint_ids[-1])
+
+        version = re.search("iOS (\d+) .*", last.name).group(1)
+        int(version) + 1
+
+        date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
+        start_date = datetime.datetime.strptime(last.start_date, date_format) + datetime.timedelta(days = 14)
+        end_date = datetime.datetime.strptime(last.end_date, date_format) + datetime.timedelta(days = 14)
+
+        start_date_str = re.sub("(\.\d{3})000([\+-])", r"\1\2", start_date.strftime(date_format))
+        end_date_str = re.sub("(\.\d{3})000([\+-])", r"\1\2", end_date.strftime(date_format))
+
+        name = "iOS %i (%s – %s)" % (int(version) + 1, start_date.strftime("%b %d"), end_date.strftime("%b %d"))
+
+        self.client.create_sprint(name, start_date_str, end_date_str)
+
+
+# Sorting Sprints
+
+class SortSprintsAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Sort sprints"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        self.client.get_all_sprints()
+
+
+#maxResults	50
+#startAt	150
+#isLast	true
+#values
+
+
+# Input / Output Helpers
+
+def input_with_prefill(prompt, text):
+    def hook():
+        readline.insert_text(text)
+        readline.redisplay()
+    readline.set_pre_input_hook(hook)
+    result = input(prompt)
+    readline.set_pre_input_hook()
+    return result
+
+
+def print_ok(msg):
+    print("\033[1m[OK]\033[0m " + msg)
+
+
+def print_error(msg):
+    print("\033[91m[ERR]\033[0m " + msg)
+
+
+# Main
+
+def main():
+    configuration = Configuration()
+
+    headers = {
+        "Authorization": "Basic " + configuration.credential,
+        "Content-Type": "application/json"
+    }
+
+    client = JiraClient(f"https://{configuration.host}", headers, configuration.board_id)
+
+    actions = [
+        CollectTicketsForReviewAction(client, configuration),
+        RankSprintsAction(client, configuration),
+        UpdateSprintAction(client, configuration),
+        CreateSprintAction(client, configuration),
+        SortSprintsAction(client, configuration)]
+
+    print()
+    print("––– Available Actions –––")
+    print()
+    for item in enumerate(actions):
+        print(" %i) %s" % (item[0] + 1, item[1].title))
+    print()
+
+    answer = input("What action would you like to perform? [1-%i] " % len(actions))
+    print()
+
+    try:
+        number = int(answer)
+    except ValueError:
+        exit(1)
+
+    if not number or number < 1 or number > len(actions):
+        exit(1)
+
+    actions[number - 1].run()
+    exit(0)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print_error(str(e))
+        traceback.print_exc()
+        exit(1)
