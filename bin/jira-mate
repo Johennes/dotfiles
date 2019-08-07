@@ -132,20 +132,32 @@ class JiraClient(NetworkClient):
         response = self.get(f"/rest/agile/1.0/sprint/{id}")
         return Sprint(response.json())
 
-    # WIP
     def get_all_sprints(self):
         print("Retrieving all sprints from board...")
+        return [Sprint(j) for j in self._get_all_pages(self._get_sprints_page)]
 
-        response = self.get(f"/rest/agile/1.0/board/{self.board_id}/sprint?startAt=0&maxResults=200")
+    def _get_sprints_page(self, start, count):
+        print(f"Retrieving page from {start} to {start + count}...")
+        response = self.get(f"/rest/agile/1.0/board/{self.board_id}/sprint?startAt={start}&maxResults={count}")
+        return response.json()
 
-        result = []
-        for value in response.json()["values"]:
-            if value["state"] == "closed":
-                continue
-            result.append(Sprint(value["id"], value["name"]))
-            print(result[-1].name)
+    def swap_sprints(self, sprint1, sprint2):
+        print(f"Swapping sprints {sprint1.name} ({sprint1.id}) with {sprint2.name} ({sprint2.id})...")
+        self.post(f"/rest/agile/1.0/sprint/{sprint1.id}/swap", json = { "sprintToSwapWith": sprint2.id })
 
-        print(result)
+    def _get_all_pages(self, get_page):
+        position = 0
+        chunk_size = 50
+
+        page = get_page(start = position, count = chunk_size)
+        values = page["values"]
+
+        while not page["isLast"]:
+            position += chunk_size
+            page = get_page(start = position, count = chunk_size)
+            values += page["values"]
+
+        return values
 
 
 # Data Structures
@@ -387,13 +399,45 @@ class SortSprintsAction(object):
         self.configuration = configuration
 
     def run(self):
-        self.client.get_all_sprints()
+        sprints = [s for s in self.client.get_all_sprints() if s.state != "closed"]
+        sorted_sprints = self._sort_sprints(sprints)
 
+        i = 0
+        while i < len(sprints):
+            index = sorted_sprints.index(sprints[i])
+            if index != i:
+                self.client.swap_sprints(sprints[i], sprints[index])
+                sprints[i], sprints[index] = sprints[index], sprints[i]
+            else:
+                i += 1
 
-#maxResults	50
-#startAt	150
-#isLast	true
-#values
+    def _sort_sprints(self, sprints):
+        regular_sprints = []
+        bucketing_sprints = []
+        unknown_sprints = []
+        review_sprint = None
+
+        for sprint in sprints:
+            if sprint.id == self.configuration.review_sprint_id:
+                review_sprint = sprint
+            elif sprint.id in self.configuration.regular_sprint_ids:
+                regular_sprints.append(sprint)
+            elif sprint.id in self.configuration.bucketing_sprint_ids:
+                bucketing_sprints.append(sprint)
+            else:
+                unknown_sprints.append(sprint)
+
+        sorted_sprints = sorted(regular_sprints, key = lambda s: s.name)
+
+        for sprint_id in self.configuration.bucketing_sprint_ids:
+            sorted_sprints += [s for s in bucketing_sprints if s.id == sprint_id]
+
+        sorted_sprints += sorted(unknown_sprints, key = lambda s: s.name)
+
+        if review_sprint:
+            sorted_sprints.append(review_sprint)
+
+        return sorted_sprints
 
 
 # Input / Output Helpers
