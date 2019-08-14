@@ -5,10 +5,12 @@
 - clean:
     - '~'
     - ~/.bash_completion.d
+    - ~/.config/fish/completions
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]
     - [test -d ~/.bash_completion.d || mkdir -p ~/.bash_completion.d, Creating Bash completion user directory]
+    - [test -d ~/.config/fish/completions || mkdir -p ~/.config/fish/completions, Creating Fish completion user directory]
 
 - link:
     # Backlink
@@ -19,4 +21,5 @@
     ~/.gitignore_global: files/gitignore_global
     ~/.hammerspoon: files/hammerspoon
     # Completion
-    ~/.bash_completion.d/nuke: completion/nuke
+    ~/.bash_completion.d/nuke.bash: completion/nuke.bash
+    ~/.config/fish/completions/nuke.fish: completion/nuke.fish
