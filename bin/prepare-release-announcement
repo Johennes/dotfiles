@@ -5,6 +5,15 @@ if [[ ! -d "${APPSTORE_REPO}" ]]; then
     exit 1
 fi
 
+plain_titles=(
+    'KAYAK'
+    'momondo'
+    'Cheapflights'
+    'SWOODOO'
+    'checkfelix'
+    'Mundi'
+)
+
 titles=(
     'KAYAK :kayak:'
     'momondo :momondo:'
@@ -45,7 +54,7 @@ function group_release_notes {
         fi
 
         matches=( "${titles[$i]}" )
-        handled+=( i )
+        handled+=( $i )
 
         for j in "${!notes[@]}"; do
             if [[ $j -le $i ]] || $(is_handled $j); then
@@ -57,21 +66,22 @@ function group_release_notes {
             fi
         done
 
-        if [[ ${#matches} != ${#titles} ]]; then
-            join "${matches[@]}"
+        if [[ ${#matches[@]} != ${#titles[@]} ]]; then
+            title=$(join "${matches[@]}")
+            echo "_${title}_"
             echo
         fi
 
-        echo "${notes[$k]}"
+        echo '```'"${notes[$i]}"'```'
         echo
     done
 }
 
-echo "@channel: Version x.x.x of the iOS app for $(join "${titles[@]}") has been released on the app store."
+echo "@channel: Version x.x.x of the iOS app for $(join "${plain_titles[@]}") has been released on the app store."
 echo
 echo "*Official Release Notes*"
 echo
-echo $(group_release_notes)
+echo "$(group_release_notes)"
 echo
 echo "*Other Noteworthy Changes*"
 echo
