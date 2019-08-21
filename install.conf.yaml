@@ -16,6 +16,7 @@
     # Backlink
     ~/.dotfiles: ''
     # Dot files
+    ~/.config/fish/config.fish: config.fish
     ~/.bash_profile: files/bash_profile
     ~/.gitconfig: files/gitconfig
     ~/.gitignore_global: files/gitignore_global
