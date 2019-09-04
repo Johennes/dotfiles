@@ -27,12 +27,9 @@ class Configuration(object):
                 raise Exception("No connection.host setting in configuration")
             self.host = connection["host"]
 
-            if "user" not in connection:
-                raise Exception("No connection.user setting in configuration")
-            if "pass" not in connection:
-                raise Exception("No connection.pass setting in configuration")
-            self.credential = b64encode(b64decode(connection["user"])
-                + b":" + b64decode(connection["pass"])).decode("ascii")
+            if "authorization" not in connection:
+                raise Exception("No connection.authorization setting in configuration")
+            self.authorization = connection["authorization"]
 
             if "board" not in config:
                 raise Exception("No board section in configuration")
@@ -466,7 +463,7 @@ def main():
     configuration = Configuration()
 
     headers = {
-        "Authorization": "Basic " + configuration.credential,
+        "Authorization": configuration.authorization,
         "Content-Type": "application/json"
     }
 
