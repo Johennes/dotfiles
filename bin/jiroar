@@ -39,6 +39,14 @@ class Configuration(object):
                 raise Exception("No board.id setting in configuration")
             self.board_id = board["id"]
 
+            if "project" not in config:
+                raise Exception("No project section in configuration")
+            project = config["project"]
+
+            if "key" not in project:
+                raise Exception("No project.key setting in configuration")
+            self.project_key = project["key"]
+
             if "sprints" not in board:
                 raise Exception("No board.sprints section in configuration")
             sprints = board["sprints"]
@@ -91,9 +99,10 @@ class NetworkClient(object):
 
 class JiraClient(NetworkClient):
 
-    def __init__(self, host, headers, board_id):
+    def __init__(self, host, headers, board_id, project_key):
         super().__init__(host, headers)
         self.board_id = board_id
+        self.project_key = project_key
 
     def get_tickets_in_backlog(self):
         print("Retrieving tickets in backlog...")
@@ -156,8 +165,26 @@ class JiraClient(NetworkClient):
 
         return values
 
+    def get_all_versions(self):
+        print("Retrieving all versions from board...")
+        return [Version(j) for j in self._get_all_pages(self._get_versions_page)]
+
+    def _get_versions_page(self, start, count):
+        print(f"Retrieving page from {start} to {start + count}...")
+        response = self.get(f"/rest/api/2/project/{self.project_key}/version?startAt={start}&maxResults={count}")
+        return response.json()
+
 
 # Data Structures
+
+class Version(object):
+
+    def __init__(self, json):
+        self.id = json["id"]
+        self.name = json["name"]
+        if "description" in json:
+            self.description = json["description"]
+
 
 class Sprint(object):
 
@@ -437,6 +464,38 @@ class SortSprintsAction(object):
         return sorted_sprints
 
 
+# Creating Versions
+
+class CreateVersionAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Create new version"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        all_versions = self.client.get_all_versions()
+        ios_versions = [v for v in all_versions if v.name.startswith("iOS")]
+
+        last_version = None
+        last_version_string = None
+
+        for version in ios_versions:
+            match = re.search("[^\d]*(\d+)[^\d]*", version.name)
+            if not match:
+                continue
+            version_string = match.group(1)
+
+            if not last_version or version_string > last_version_string:
+                last_version = version
+                last_version_string = version_string
+
+        print(last_version)
+        print(last_version_string)
+        #>>> from packaging import version
+        #>>> version.parse("2.3.1") < version.parse("10.1.2")
+
+
 # Input / Output Helpers
 
 def input_with_prefill(prompt, text):
@@ -467,14 +526,15 @@ def main():
         "Content-Type": "application/json"
     }
 
-    client = JiraClient(f"https://{configuration.host}", headers, configuration.board_id)
+    client = JiraClient(f"https://{configuration.host}", headers, configuration.board_id, configuration.project_key)
 
     actions = [
         CollectTicketsForReviewAction(client, configuration),
         RankSprintsAction(client, configuration),
         UpdateSprintAction(client, configuration),
         CreateSprintAction(client, configuration),
-        SortSprintsAction(client, configuration)]
+        SortSprintsAction(client, configuration),
+        CreateVersionAction(client, configuration)]
 
     print()
     print("––– Available Actions –––")
