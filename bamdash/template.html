@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="refresh" content="60" >
+        <title>bam!dash</title>
+        <link rel="stylesheet" href="https://necolas.github.io/normalize.css/latest/normalize.css">
+    </head>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .branch-container {
+            float: left;
+        }
+        .branch-container:nth-child(n+2) {
+            margin-left: 20px;
+        }
+        dt {
+            color: #e44e57;
+        }
+        dd {
+            font-size: 90%;
+            margin-left: 0;
+            margin-bottom: 20px;
+            margin-top: 5px;
+        }
+        .timestamp {
+            clear: both;
+            color: #a0afba;
+            font-size: 80%;
+        }
+        a, a:visited {
+            color: #0b7b99;
+        }
+    </style>
+    <body>
+        {{#branches}}
+        <div class="branch-container">
+            <h2>{{name}}</h2>
+            <dl>
+                {{#failures}}
+                <dt>{{planName}}</dt>
+                <dd>
+                    💥 {{buildTime}}<br/>
+                    <a href="{{resultLink}}">Open result</a><br/>
+                    <a href="{{planLink}}">Open plan</a>
+                </dd>
+                {{/failures}}
+            </dl>
+        </div>
+        {{/branches}}
+        <div class="timestamp">
+            Last update: {{date}}
+        </div>
+    </body>
+</html>
