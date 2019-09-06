@@ -48,17 +48,38 @@ function loadTemplate(templatePath) {
 
 function loadContext() {
     return new Promise(async function(resolve, reject) {
+        let agents = await bambooGetAlliOSAgents()
         let masterResults = await bambooGetLatestFailedResults('master')
         let releaseBranch = (await bitbucketGetLatestReleaseBranch())['displayId']
         let releaseBranchResults = await bambooGetLatestFailedResults(releaseBranch)
         resolve({
+            agents: getAgentsContexts(agents),
             branches: [
-                getBranchContext('master', masterResults, 'plan'),
-                getBranchContext(releaseBranch, releaseBranchResults, 'master')
-            ],
+                    getBranchContext('master', masterResults, 'plan'),
+                    getBranchContext(releaseBranch, releaseBranchResults, 'master')
+                ],
             date: getCurrentTime()
         })
     })
+}
+
+function getAgentsContexts(agents) {
+    return {
+        numTotal: agents.length,
+        numBusy: agents.filter(function(agent) {
+                return agent['busy']
+            }).length,
+        inactiveOrDisabled: agents.filter(function(agent) {
+                return !agent['active'] || !agent['enabled']
+            }).map(function(agent) {
+                return {
+                    name: agent['name'],
+                    isActive: agent['active'],
+                    isEnabled: agent['enabled'],
+                    link: config.bamboo.host + '/admin/agent/viewAgent.action?agentId=' + agent['id']
+                }
+            })
+    }
 }
 
 function getBranchContext(name, results, planNameKey) {
@@ -248,6 +269,15 @@ async function bambooGetAllBranches(planKey) {
     return await bambooGetAll('/rest/api/latest/plan/' + planKey + '/branch', 'branches', 'branch')
 }
 
+async function bambooGetAgents() {
+    try {
+        return await bambooGet('/rest/api/latest/agent')
+    } catch (error) {
+        console.log('ERR Failed to get agents: ' + error)
+        return []
+    }
+}
+
 // Bamboo Response Processing
 
 async function bambooGetAllEnabledPlans() {
@@ -325,6 +355,19 @@ async function bambooGetLatestFailedResults(branchName) {
     return (await Promise.all(promises)).filter(function(result) {
         return result != null
     })
+}
+
+async function bambooGetAlliOSAgents() {
+    let allAgents = await bambooGetAgents()
+    let iosAgents = allAgents.filter(function(agent) {
+        return agent['name'].includes('ios')
+    })
+
+    iosAgents.sort(function compare(one, other) {
+        return one['name'] < other['name'] ? -1 : one['name'] > other['name'] ? 1 : 0
+    })
+
+    return iosAgents
 }
 
 // Main

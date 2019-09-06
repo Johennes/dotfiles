@@ -14,26 +14,36 @@
         }
         .branch-container {
             float: left;
+            margin-bottom: 10px;
         }
         .branch-container:nth-child(n+2) {
             margin-left: 20px;
         }
-        dt {
-            color: #e44e57;
+        .agent-container {
+            clear: both;
+            margin-bottom: 30px;
         }
         dd {
-            font-size: 90%;
             margin-left: 0;
             margin-bottom: 20px;
             margin-top: 5px;
         }
+        .good {
+            color: #26a664;
+        }
+        .bad {
+            color: #e44e57;
+        }
+        .small {
+            font-size: 90%;
+        }
         .timestamp {
             clear: both;
             color: #a0afba;
-            font-size: 80%;
         }
         a, a:visited {
             color: #0b7b99;
+            text-decoration: none;
         }
     </style>
     <body>
@@ -42,17 +52,39 @@
             <h2>{{name}}</h2>
             <dl>
                 {{#failures}}
-                <dt>{{planName}}</dt>
-                <dd>
+                <dt class="bad">{{planName}}</dt>
+                <dd class="small">
                     💥 {{buildTime}}<br/>
                     <a href="{{resultLink}}">Open result</a><br/>
                     <a href="{{planLink}}">Open plan</a>
                 </dd>
+                {{else}}
+                <span class="good small">
+                    ✅ Green as grass
+                </span>
                 {{/failures}}
             </dl>
         </div>
         {{/branches}}
-        <div class="timestamp">
+        <div class="agent-container">
+            <h2>Agents</h2>
+            {{agents.numTotal}} total / {{agents.numBusy}} busy<br/>
+            {{#agents.inactiveOrDisabled}}
+            <dl>
+                <dt class="bad">{{name}}</dt>
+                <dd class="small">
+                    {{#unless isActive}}
+                    💥 inactive<br/>
+                    {{/unless}}
+                    {{#unless isEnabled}}
+                    💥 disabled<br/>
+                    {{/unless}}
+                    <a href="{{link}}">Open agent</a>
+                </dd>
+            </dl>
+            {{/agents.inactiveOrDisabled}}
+        </div>
+        <div class="timestamp small">
             Last update: {{date}}
         </div>
     </body>
