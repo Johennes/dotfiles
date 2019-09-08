@@ -1,0 +1,19 @@
+[alias]
+	c = checkout
+	cp = cherry-pick
+	f = fetch
+	l = log --graph --decorate
+	pl = pull -p
+	ps = push
+	s = status
+	ud = log ..@{u}
+[core]
+	excludefile = ~/.gitignore_global
+[pull]
+	rebase = true
+[push]
+	default = simple
+[user]
+	name = Johannes Marbach
+[include]
+	path = ~/.gitconfig_local

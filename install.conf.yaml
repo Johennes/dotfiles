@@ -18,9 +18,6 @@
     # Dot files
     ~/.config/fish/config.fish: config.fish
     ~/.bash_profile: files/bash_profile
-    ~/.gitconfig: files/gitconfig
-    ~/.gitignore_global: files/gitignore_global
-    ~/.hammerspoon: files/hammerspoon
     # Completion
     ~/.bash_completion.d/nuke.bash: completion/nuke.bash
     ~/.config/fish/completions/nuke.fish: completion/nuke.fish
