@@ -8,10 +8,11 @@ case "$1" in
         rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*
         ;;
     screenshots)
-        find ~/Desktop \( -name "Screenshot*" -o -name "Simulator Screen Shot*" \) -exec rm -fv "{}" \;
+        find ~/Desktop \( -name "Screenshot*" -o -name "Simulator Screen Shot*" \) -exec rm -f "{}" \;
         ;;
     trash)
-        rm -rf ~/.Trash/*
+        [[ -d ~/.Trash ]] && rm -rf ~/.Trash/*
+        which gio > /dev/null 2>&1 && gio trash --empty --force
         ;;
     *)
         echo "Nothing to nuke! (╯°□°)╯︵┻━┻"
