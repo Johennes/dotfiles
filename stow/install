@@ -1,0 +1,11 @@
+#!/bin/bash
+
+[[ -f "$1" ]] || { echo "Error: Missing package file"; exit 1; }
+
+stow_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)
+target_dir=~
+
+while read -r package; do
+    [[ -d "${stow_dir}/${package}" ]] || { echo "Warning: Ignoring missing package ${package}"; continue; }
+    stow -v -d "${stow_dir}" -t "${target_dir}" -R "${package}"
+done < "$1"
