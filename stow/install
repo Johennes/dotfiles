@@ -3,12 +3,13 @@
 which stow > /dev/null 2>&1 || { echo "Error: Could not locate GNU Stow binary"; exit 1; }
 
 function stow_all {
-    local stow_dir=$1
-    local target_dir=~
-
     while read -r package; do
-        stow -v -d "${stow_dir}" -t "${target_dir}" -R "$(basename "${package}")"
-    done < <(find "${stow_dir}" -mindepth 1 -maxdepth 1 -type d)
+        stow_one "$(basename "${package}")" "$1"
+    done < <(find "$1" -mindepth 1 -maxdepth 1 -type d)
+}
+
+function stow_one {
+    stow -v -d "$2" -t ~ -R "$(basename "$1")"
 }
 
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)
