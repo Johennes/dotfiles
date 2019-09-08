@@ -17,7 +17,6 @@
     ~/.dotfiles: ''
     # Dot files
     ~/.config/fish/config.fish: config.fish
-    ~/.bash_profile: files/bash_profile
     # Completion
     ~/.bash_completion.d/nuke.bash: completion/nuke.bash
     ~/.config/fish/completions/nuke.fish: completion/nuke.fish
