@@ -12,7 +12,6 @@ case "$1" in
         ;;
     trash)
         [[ -d ~/.Trash ]] && rm -rf ~/.Trash/*
-        which gio > /dev/null 2>&1 && gio trash --empty --force
         ;;
     *)
         echo "Nothing to nuke! (╯°□°)╯︵┻━┻"

@@ -7,8 +7,6 @@
 	ps = push
 	s = status
 	ud = log ..@{u}
-[core]
-	excludefile = ~/.gitignore_global
 [pull]
 	rebase = true
 [push]

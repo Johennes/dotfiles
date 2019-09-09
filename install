@@ -1,15 +1,33 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -e
+which stow > /dev/null 2>&1 || { echo "Error: Could not locate GNU Stow binary"; exit 1; }
 
-CONFIG="install.conf.yaml"
-DOTBOT_DIR="dotbot"
+operation=${1--R}
 
-DOTBOT_BIN="bin/dotbot"
-BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+function stow_all {
+    while read -r package; do
+        stow_one "$(basename "${package}")" "$1"
+    done < <(find "$1" -mindepth 1 -maxdepth 1 -type d)
+}
 
-cd "${BASEDIR}"
-git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
-git submodule update --init --recursive "${DOTBOT_DIR}"
+function stow_one {
+    echo "|> Stowing $1"
+    eval stow -v -d "$2" -t ~ ${operation} "$1"
+}
 
-"${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" -c "${CONFIG}" "${@}"
+root=$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" > /dev/null 2>&1 \
+    && git rev-parse --show-toplevel)
+
+stow_all "${root}/stow/common" "${1--R}"
+
+case "$(uname -s)" in
+    Linux*)
+        stow_all "${root}/stow/linux" "${1--R}"
+        ;;
+    Darwin*)
+        stow_all "${root}/stow/mac" "${1--R}"
+        ;;
+    *)
+        echo "Error: Unknown system $(uname -s)"
+        ;;
+esac
