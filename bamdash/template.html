@@ -55,8 +55,8 @@
                 <dt class="bad">{{planName}}</dt>
                 <dd class="small">
                     💥 {{buildTime}}<br/>
-                    <a href="{{resultLink}}">Open result</a><br/>
-                    <a href="{{planLink}}">Open plan</a>
+                    <a href="{{resultLink}}" target="_blank">Open result</a><br/>
+                    <a href="{{planLink}}" target="_blank">Open plan</a>
                 </dd>
                 {{else}}
                 <span class="good small">
@@ -79,7 +79,7 @@
                     {{#unless isEnabled}}
                     💥 disabled<br/>
                     {{/unless}}
-                    <a href="{{link}}">Open agent</a>
+                    <a href="{{link}}" target="_blank">Open agent</a>
                 </dd>
             </dl>
             {{/agents.inactiveOrDisabled}}
