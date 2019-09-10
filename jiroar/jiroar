@@ -555,7 +555,9 @@ def main():
         exit(1)
 
     actions[number - 1].run()
-    exit(0)
+
+    print()
+    print("DONE! RRROOOOOOAAAAAARRR!! 🦖")
 
 
 if __name__ == "__main__":
