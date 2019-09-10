@@ -1,5 +1,5 @@
 {
-  "name": "bam!dash",
+  "name": "bamdash",
   "version": "0.0.1",
   "description": "Bamboo dashboard server",
   "bin": "index.js",

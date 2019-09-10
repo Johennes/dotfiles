@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="refresh" content="60" >
+        <meta http-equiv="refresh" content="120" >
         <title>bam!dash</title>
         <link rel="stylesheet" href="https://necolas.github.io/normalize.css/latest/normalize.css">
     </head>
@@ -12,11 +12,11 @@
             padding-left: 20px;
             padding-right: 20px;
         }
-        .branch-container {
+        .group-container {
             float: left;
             margin-bottom: 10px;
         }
-        .branch-container:nth-child(n+2) {
+        .group-container:nth-child(n+2) {
             margin-left: 20px;
         }
         .agent-container {
@@ -47,8 +47,8 @@
         }
     </style>
     <body>
-        {{#branches}}
-        <div class="branch-container">
+        {{#groups}}
+        <div class="group-container">
             <h2>{{name}}</h2>
             <dl>
                 {{#failures}}
@@ -65,7 +65,7 @@
                 {{/failures}}
             </dl>
         </div>
-        {{/branches}}
+        {{/groups}}
         <div class="agent-container">
             <h2>Agents</h2>
             {{agents.numTotal}} total / {{agents.numBusy}} busy<br/>

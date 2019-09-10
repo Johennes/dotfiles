@@ -49,14 +49,16 @@ function loadTemplate(templatePath) {
 function loadContext() {
     return new Promise(async function(resolve, reject) {
         let agents = await bambooGetAlliOSAgents()
-        let masterResults = await bambooGetLatestFailedResults('master')
+        let masterResults = await bambooGetLatestFailedResults('IOS', 'master')
         let releaseBranch = (await bitbucketGetLatestReleaseBranch())['displayId']
-        let releaseBranchResults = await bambooGetLatestFailedResults(releaseBranch)
+        let releaseBranchResults = await bambooGetLatestFailedResults('IOS', releaseBranch)
+        let screenshotResults = await bambooGetLatestFailedResults('IOSS', 'master')
         resolve({
             agents: getAgentsContexts(agents),
-            branches: [
-                    getBranchContext('master', masterResults, 'plan'),
-                    getBranchContext(releaseBranch, releaseBranchResults, 'master')
+            groups: [
+                    getGroupContext('master', masterResults, 'plan'),
+                    getGroupContext(releaseBranch, releaseBranchResults, 'master'),
+                    getGroupContext('Screenshots', screenshotResults, 'plan')
                 ],
             date: getCurrentTime()
         })
@@ -82,7 +84,7 @@ function getAgentsContexts(agents) {
     }
 }
 
-function getBranchContext(name, results, planNameKey) {
+function getGroupContext(name, results, planNameKey) {
     return {
         name: name,
         failures: results.map(function(result) {
@@ -248,8 +250,8 @@ async function bambooGetAll(path, entityPlural, entitySingular) {
     return results
 }
 
-async function bambooGetAllPlans() {
-    return await bambooGetAll('/rest/api/latest/project/IOS?expand=plans', 'plans', 'plan')
+async function bambooGetAllPlans(projectKey) {
+    return await bambooGetAll('/rest/api/latest/project/' + projectKey + '?expand=plans', 'plans', 'plan')
 }
 
 async function bambooGetAllResults(planKey) {
@@ -280,8 +282,8 @@ async function bambooGetAgents() {
 
 // Bamboo Response Processing
 
-async function bambooGetAllEnabledPlans() {
-    let plans = await bambooGetAllPlans()
+async function bambooGetAllEnabledPlans(projectKey) {
+    let plans = await bambooGetAllPlans(projectKey)
     return plans.filter(function(plan) {
         return plan['enabled']
     })
@@ -300,10 +302,10 @@ async function bambooGetBranch(branchName, planKey) {
     return null
 }
 
-async function bambooGetLatestFailedResults(branchName) {
+async function bambooGetLatestFailedResults(projectKey, branchName) {
     console.log('Getting all enabled plans...')
 
-    let allPlans = await bambooGetAllEnabledPlans()
+    let allPlans = await bambooGetAllEnabledPlans(projectKey)
     let planKeys = []
 
     if (branchName == 'master') {
