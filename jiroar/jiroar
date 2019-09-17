@@ -148,7 +148,7 @@ class JiraClient(NetworkClient):
         return response.json()
 
     def swap_sprints(self, sprint1, sprint2):
-        print(f"Swapping sprints {sprint1.name} ({sprint1.id}) with {sprint2.name} ({sprint2.id})...")
+        print(f"Swapping sprint {sprint1.name} ({sprint1.id}) with {sprint2.name} ({sprint2.id})...")
         self.post(f"/rest/agile/1.0/sprint/{sprint1.id}/swap", json = { "sprintToSwapWith": sprint2.id })
 
     def _get_all_pages(self, get_page):
