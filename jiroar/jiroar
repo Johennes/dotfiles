@@ -365,7 +365,7 @@ class UpdateSprintAction(object):
         start_date = input_with_prefill("New start date: ", sprint.start_date)
         end_date = input_with_prefill("New end date: ", sprint.end_date)
 
-        client.update_sprint(sprint, name, start_date, end_date)
+        self.client.update_sprint(sprint, name, start_date, end_date)
 
     def pick_sprint(self, sprints):
         print("––– Available Sprints –––")
@@ -402,7 +402,7 @@ class CreateSprintAction(object):
         int(version) + 1
 
         date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
-        start_date = datetime.datetime.strptime(last.start_date, date_format) + datetime.timedelta(days = 14)
+        start_date = datetime.datetime.strptime(last.end_date, date_format) + datetime.timedelta(days = 1)
         end_date = datetime.datetime.strptime(last.end_date, date_format) + datetime.timedelta(days = 14)
 
         start_date_str = re.sub("(\.\d{3})000([\+-])", r"\1\2", start_date.strftime(date_format))
