@@ -47,6 +47,12 @@ class Configuration(object):
                 raise Exception("No project.key setting in configuration")
             self.project_key = project["key"]
 
+            if "ignore" not in project:
+                self.ignored_keys = []
+            else:
+                self.ignored_keys = project["ignore"]
+
+
             if "sprints" not in board:
                 raise Exception("No board.sprints section in configuration")
             sprints = board["sprints"]
@@ -201,6 +207,7 @@ class Sprint(object):
 class Ticket(object):
 
     def __init__(self, json):
+        self.link =json["self"]
         self.key = json["key"]
         self.priority = json["fields"]["priority"]["name"]
         if json["fields"]["assignee"]:
@@ -218,7 +225,7 @@ class CollectTicketsForReviewAction(object):
         self.configuration = configuration
 
     def run(self):
-        keys = [t.key for t in self.client.get_tickets_in_backlog()]
+        keys = [t.key for t in self.client.get_tickets_in_backlog() if t.key not in self.configuration.ignored_keys]
         if keys:
             sprint = self.client.get_sprint(self.configuration.review_sprint_id)
             self.client.move_tickets_to_sprint(sprint, keys)
