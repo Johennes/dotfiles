@@ -16,7 +16,7 @@ import yaml
 class Configuration(object):
 
     def __init__(self):
-        with open(os.path.join(os.path.expanduser("~"), ".jira-mate.yaml"), "r") as stream:
+        with open(os.path.join(os.path.expanduser("~"), ".jiroar.yaml"), "r") as stream:
             config = yaml.safe_load(stream)
 
             if "connection" not in config:
