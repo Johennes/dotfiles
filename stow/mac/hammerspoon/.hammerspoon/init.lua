@@ -95,6 +95,6 @@ hs.hotkey.bind(hyper, "j",hs.hints.windowHints)
 
 -- Application Shortcuts
 
-hs.hotkey.bind(hyper, "t", function()
-  hs.urlevent.openURL("https://www.dict.cc/?s=")
-end)
+--hs.hotkey.bind(hyper, "t", function()
+--  hs.urlevent.openURL("https://www.dict.cc/?s=")
+--end)
