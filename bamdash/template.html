@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="refresh" content="120" >
+        <meta http-equiv="refresh" content="600" >
         <title>bam!dash</title>
         <link rel="stylesheet" href="https://necolas.github.io/normalize.css/latest/normalize.css">
     </head>
@@ -13,20 +13,20 @@
             padding-right: 20px;
         }
         .group-container {
-            float: left;
-            margin-bottom: 10px;
+            /* float: left; */
+            /* margin-bottom: 10px; */
         }
         .group-container:nth-child(n+2) {
-            margin-left: 20px;
+            /* margin-left: 20px; */
         }
         .agent-container {
-            clear: both;
+            /* clear: both; */
             margin-bottom: 30px;
         }
         dd {
             margin-left: 0;
-            margin-bottom: 20px;
-            margin-top: 5px;
+            margin-bottom: 25px;
+            margin-top: 0;
         }
         .good {
             color: #26a664;
@@ -43,7 +43,21 @@
         }
         a, a:visited {
             color: #0b7b99;
-            text-decoration: none;
+        }
+        p {
+            margin: 5px 0;
+        }
+        #release-status {
+            /* column-count: 3; */
+            display: grid;
+grid-template-columns: 1fr 1fr 1fr 1fr;
+grid-auto-rows: auto;
+grid-gap: 10px;
+justify-items: center;
+        }
+        #release-status .group-container {
+            /* display: inline-block; */
+            /* width: 100%; */
         }
     </style>
     <body>
@@ -66,6 +80,75 @@
             </dl>
         </div>
         {{/groups}}
+        <div id="release-status">
+            {{#releaseStatus}}
+            <div class="group-container">
+                <h2>{{brand}}</h2>
+                {{#if readyToSubmit}}
+                    <p class="good">Ready to submit</p>
+                {{else}}
+                    {{#unless translations.successful}}
+                    <p class="bad">Waiting for translations</p>
+                    {{/unless}}
+                    {{#unless testFlight.successful}}
+                    <p class="bad">TestFlight build failed</p>
+                    {{/unless}}
+                    {{#if processing}}
+                    <p class="bad">Build processing in AppStoreConnect</p>
+                    {{/if}}
+                {{/if}}
+                <h3>Details</h3>
+                <dt><a href="{{translations.resultLink}}" target="_blank">Translations</a></dt>
+                <dd class="small">
+                    <p>
+                        Bamboo plan ran {{translations.buildTime}}
+                    </p>
+                    <p>
+                        Status: {{#if translations.successful}}
+                            <span class="good">translations done</span>
+                        {{else}}
+                            <span class="bad">translations incomplete</span>
+                        {{/if}}
+                    </p>
+                </dd>
+                <dt><a href="{{testFlight.resultLink}}" target="_blank">TestFlight build {{releaseBranch}}</a></dt>
+                <dd class="small">
+                    <p>
+                        Bamboo plan ran {{testFlight.buildTime}}
+                    </p>
+                    {{#if testFlight.commit}}
+                    <p>
+                        {{testFlight.commit.committer}} committed {{testFlight.commit.commitTime}}<br/>
+                        <a href="{{testFlight.commit.link}}">{{testFlight.commit.sha}}</a> – {{testFlight.commit.subject}}
+                    </p>
+                    {{/if}}
+                    <p>
+                        Status: {{#if testFlight.successful}}
+                            <span class="good">successful</span> – {{testFlight.bundleVersion}}
+                        {{else}}
+                            <span class="bad">failed</span>
+                        {{/if}}
+                    </p>
+                </dd>
+                <dt><a href="{{latestBuild.resultLink}}" target="_blank">AppStoreConnect status</a></dt>
+                <dd class="small">
+                    <p>
+                        Bamboo plan ran {{latestBuild.buildTime}}
+                    </p>
+                    <p>
+                        Status: {{#if latestBuild.successful}}
+                            <span class="good">successful</span>
+                        {{else}}
+                            <span class="bad">failed</span>
+                        {{/if}}
+                    </p>
+                    <p>
+                        Latest available build: {{latestBuild.shortVersion}} ({{latestBuild.bundleVersion}})
+                    </p>
+                </dd>
+            </div>
+            {{/releaseStatus}}
+        </div>
         <div class="agent-container">
             <h2>Agents</h2>
             {{agents.numTotal}} total / {{agents.numBusy}} busy<br/>
