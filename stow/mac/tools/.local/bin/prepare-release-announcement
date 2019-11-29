@@ -77,7 +77,7 @@ function group_release_notes {
     done
 }
 
-echo "@channel: Version x.x.x of the iOS app for $(join "${plain_titles[@]}") has been released on the app store."
+echo "@channel: Version x.x.x of the iOS app for $(join "${plain_titles[@]}") started rolling out in phases on the app store."
 echo
 echo "*Official Release Notes*"
 echo
