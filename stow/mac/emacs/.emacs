@@ -11,6 +11,8 @@
 (package-initialize)
 
 ;; Load color theme
+;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/") 
+;;(load-theme 'synthwave t)
 (load-theme 'zeno t)
 
 
