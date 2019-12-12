@@ -91,10 +91,22 @@ end)
 
 -- Window Hints
 
-hs.hotkey.bind(hyper, "j",hs.hints.windowHints)
+--hs.hotkey.bind(hyper, "j",hs.hints.windowHints)
 
 -- Application Shortcuts
 
---hs.hotkey.bind(hyper, "t", function()
---  hs.urlevent.openURL("https://www.dict.cc/?s=")
---end)
+hs.hotkey.bind(hyper, "i", function()
+  hs.application.launchOrFocus("iTerm")
+end)
+
+hs.hotkey.bind(hyper, "f", function()
+  hs.application.launchOrFocus("Firefox")
+end)
+
+hs.hotkey.bind(hyper, "s", function()
+  hs.application.launchOrFocus("Slack")
+end)
+
+hs.hotkey.bind(hyper, "x", function()
+  hs.application.launchOrFocus("Xcode")
+end)
