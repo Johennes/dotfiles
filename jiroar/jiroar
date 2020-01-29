@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from base64 import b64decode, b64encode
+from packaging.version import parse as parse_version
 import datetime
 import re
 import readline
@@ -157,17 +158,23 @@ class JiraClient(NetworkClient):
         print(f"Swapping sprint {sprint1.name} ({sprint1.id}) with {sprint2.name} ({sprint2.id})...")
         self.post(f"/rest/agile/1.0/sprint/{sprint1.id}/swap", json = { "sprintToSwapWith": sprint2.id })
 
-    def _get_all_pages(self, get_page):
+    def _get_all_pages(self, get_page, key="values"):
         position = 0
         chunk_size = 50
 
         page = get_page(start = position, count = chunk_size)
-        values = page["values"]
+        values = page[key]
 
-        while not page["isLast"]:
+        while True:
+            if "isLast" in page:
+                if page["isLast"]:
+                    break
+            elif len(values) == page["total"]:
+                break
+
             position += chunk_size
             page = get_page(start = position, count = chunk_size)
-            values += page["values"]
+            values += page[key]
 
         return values
 
@@ -180,6 +187,27 @@ class JiraClient(NetworkClient):
         response = self.get(f"/rest/api/2/project/{self.project_key}/version?startAt={start}&maxResults={count}")
         return response.json()
 
+    def create_version(self, name, start_date, submission_date):
+        print(f"Creating version {name} ({start_date} – {submission_date})...")
+        response = self.post("/rest/api/2/version",
+            json = {
+                "name": name,
+                "description": f"Submission scheduled for {submission_date}",
+                "startDate": start_date,
+                "releaseDate": submission_date,
+                "project": self.project_key
+            })
+        link = response.json()["self"]
+        print(f"New version: {link}")
+
+    def find_all_tickets(self, jql):
+        print(f"Retrieving tickets for JQL {jql}...")
+        return [j for j in self._get_all_pages(lambda start, count: self._find_tickets_page(start, count, jql), key="issues")]
+
+    def _find_tickets_page(self, start, count, jql):
+        print(f"Retrieving page from {start} to {start + count}...")
+        response = self.get(f"/rest/api/2/search?jql={jql}&startAt={start}&maxResults={count}")
+        return response.json()
 
 # Data Structures
 
@@ -190,6 +218,10 @@ class Version(object):
         self.name = json["name"]
         if "description" in json:
             self.description = json["description"]
+        if "startDate" in json:
+            self.start_date = json["startDate"]
+        if "releaseDate" in json:
+            self.release_date = json["releaseDate"]
 
 
 class Sprint(object):
@@ -406,7 +438,6 @@ class CreateSprintAction(object):
         last = self.client.get_sprint(self.configuration.regular_sprint_ids[-1])
 
         version = re.search("iOS (\d+) .*", last.name).group(1)
-        int(version) + 1
 
         date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
         last_end_date = datetime.datetime.strptime(last.end_date, date_format)
@@ -476,6 +507,39 @@ class SortSprintsAction(object):
         return sorted_sprints
 
 
+# Generating Statistics
+
+class GenerateStatisticsAction(object):
+
+    def __init__(self, client, configuration):
+        self.title = "Generate statistics"
+        self.client = client
+        self.configuration = configuration
+
+    def run(self):
+        tickets = self.client.find_all_tickets("fixVersion = \"iOS 124\"")
+        groups = {}
+        for ticket in tickets:
+            type = ticket["fields"]["issuetype"]["name"]
+            if type not in groups:
+                groups[type] = []
+
+            groups[type].append(ticket)
+
+            summary = ticket["fields"]["summary"]
+            fixVersions = ticket["fields"]["fixVersions"]
+
+            print(type)
+            print(summary)
+            for fixVersion in fixVersions:
+                print(fixVersion["name"])
+
+        print()
+
+        for group in groups:
+            print(f"{group}: {len(groups[group])}")
+
+
 # Creating Versions
 
 class CreateVersionAction(object):
@@ -498,14 +562,22 @@ class CreateVersionAction(object):
                 continue
             version_string = match.group(1)
 
-            if not last_version or version_string > last_version_string:
+            if not last_version or parse_version(version_string) > parse_version(last_version_string):
                 last_version = version
                 last_version_string = version_string
 
-        print(last_version)
-        print(last_version_string)
-        #>>> from packaging import version
-        #>>> version.parse("2.3.1") < version.parse("10.1.2")
+        date_format = "%Y-%m-%d"
+        last_start_date = datetime.datetime.strptime(last_version.start_date, date_format)
+        last_release_date = datetime.datetime.strptime(last_version.release_date, date_format)
+
+        start_date = last_start_date + datetime.timedelta(days = 14)
+        release_date = last_release_date + datetime.timedelta(days = 14)
+        start_date_str = start_date.strftime(date_format)
+        release_date_str = release_date.strftime(date_format)
+
+        name = "iOS %i" % (int(last_version_string) + 1)
+
+        self.client.create_version(name, start_date_str, release_date_str)
 
 
 # Input / Output Helpers
@@ -546,6 +618,7 @@ def main():
         UpdateSprintAction(client, configuration),
         CreateSprintAction(client, configuration),
         SortSprintsAction(client, configuration),
+        GenerateStatisticsAction(client, configuration),
         CreateVersionAction(client, configuration)]
 
     print()
