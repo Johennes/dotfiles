@@ -9,6 +9,7 @@ plain_titles=(
     'KAYAK'
     'momondo'
     'Cheapflights'
+    'HotelsCombined'
     'SWOODOO'
     'checkfelix'
     'Mundi'
@@ -18,6 +19,7 @@ titles=(
     'KAYAK :kayak:'
     'momondo :momondo:'
     'Cheapflights :cf:'
+    'HotelsCombined :hotelscombined:'
     'SWOODOO :swoo:'
     'checkfelix :felix:'
     'Mundi :mundi:'
@@ -27,6 +29,7 @@ notes=(
     "$(cat ${APPSTORE_REPO}/iOS/KAYAK/metadata/en-US/release_notes.txt)"
     "$(cat ${APPSTORE_REPO}/iOS/momondo/metadata/en-US/release_notes.txt)"
     "$(cat ${APPSTORE_REPO}/iOS/Cheapflights/metadata/en-US/release_notes.txt)"
+    "$(cat ${APPSTORE_REPO}/iOS/HotelsCombined/metadata/en-US/release_notes.txt)"
     "$(cat ${APPSTORE_REPO}/iOS/SWOODOO/metadata/en-US/release_notes.txt)"
     "$(cat ${APPSTORE_REPO}/iOS/Checkfelix/metadata/en-US/release_notes.txt)"
     "$(cat ${APPSTORE_REPO}/iOS/Mundi/metadata/en-US/release_notes.txt)"
