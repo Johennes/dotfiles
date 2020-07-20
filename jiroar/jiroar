@@ -84,18 +84,21 @@ class NetworkClient(object):
         self.headers = headers
 
     def get(self, path, **kwargs):
+        print(f"GET {self.host}{path}")
         response = requests.get(f"{self.host}{path}" , headers = self.headers, **kwargs)
         if not response:
             raise Exception(response.text)
         return response
 
     def post(self, path, **kwargs):
+        print(f"POST {self.host}{path}")
         response = requests.post(f"{self.host}{path}", headers = self.headers, **kwargs)
         if not response:
             raise Exception(response.text)
         return response
 
     def put(self, path, **kwargs):
+        print(f"PUT {self.host}{path}")
         response = requests.put(f"{self.host}{path}", headers = self.headers, **kwargs)
         if not response:
             raise Exception(response.text)
