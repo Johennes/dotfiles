@@ -15,3 +15,8 @@
 	name = Johannes Marbach
 [include]
 	path = ~/.gitconfig_local
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
