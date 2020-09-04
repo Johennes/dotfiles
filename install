@@ -4,6 +4,23 @@ which stow > /dev/null 2>&1 || { echo "Error: Could not locate GNU Stow"; exit 1
 
 operation=${1--R}
 
+case "${operation}" in
+    -h|--help)
+        echo "Usage: install [OPTION]"
+        echo
+        echo "  -D  Unstow packages"
+        echo "  -R  Restow packages (default)"
+        echo "  -S  Stow packages"
+        exit 0
+        ;;
+    -D|-S|-R)
+        ;;
+    *)
+        echo "Error: Unsupported operation ${operation}"
+        exit 1
+        ;;
+esac
+
 function stow_all {
     while read -r package; do
         stow_one "$(basename "${package}")" "$1"
