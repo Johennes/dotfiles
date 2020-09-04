@@ -1,6 +1,6 @@
 #!/bin/bash
 
-which stow > /dev/null 2>&1 || { echo "Error: Could not locate GNU Stow binary"; exit 1; }
+which stow > /dev/null 2>&1 || { echo "Error: Could not locate GNU Stow"; exit 1; }
 
 operation=${1--R}
 
@@ -18,14 +18,14 @@ function stow_one {
 root=$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" > /dev/null 2>&1 \
     && git rev-parse --show-toplevel)
 
-stow_all "${root}/stow/common" "${1--R}"
+stow_all "${root}/stow/common"
 
 case "$(uname -s)" in
     Linux*)
-        stow_all "${root}/stow/linux" "${1--R}"
+        stow_all "${root}/stow/linux"
         ;;
     Darwin*)
-        stow_all "${root}/stow/mac" "${1--R}"
+        stow_all "${root}/stow/mac"
         ;;
     *)
         echo "Error: Unknown system $(uname -s)"
