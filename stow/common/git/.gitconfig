@@ -7,6 +7,7 @@
 	ps = push
 	s = status
 	ud = log ..@{u}
+	psgt = !git ps https://$GITEA_ACCESS_TOKEN@$(git config --get remote.origin.url | sed 's|https://||') $@
 [pull]
 	rebase = true
 [push]
