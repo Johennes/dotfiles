@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+cd "$(resolve-symbolic-link "$(which tif2jpg)" | xargs dirname)"
+"$(git rev-parse --show-toplevel)"/music-management/src/tif2jpg.sh

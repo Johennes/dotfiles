@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+cd "$(resolve-symbolic-link "$(which add-replay-gain)" | xargs dirname)"
+"$(git rev-parse --show-toplevel)"/music-management/src/add-replay-gain.sh

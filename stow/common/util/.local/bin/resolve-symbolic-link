@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# GNU readlink can do the below in one line with the -f flag. Unfortunately, BSD readlink
+# doesn't support a similar flag. This is a poor man's cross-platform replacement.
+
+if [[ ! -e $1 ]]; then
+  exit 1
+fi
+
+file=${1-$(which "$1")}
+cd "$(dirname "$file")"
+file=$(basename "$file")
+
+while [[ -L "$file" ]]; do
+  file=$(readlink "$file")
+  cd "$(dirname "$file")"
+  file=$(basename "$file")
+done
+
+echo "$(pwd -P "$file")/$file"
