@@ -3,4 +3,4 @@
 set -e
 
 cd "$(resolve-symbolic-link "$(which generate-covers)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/generate-covers.sh
+"$(git rev-parse --show-toplevel)"/music-management/src/generate-covers

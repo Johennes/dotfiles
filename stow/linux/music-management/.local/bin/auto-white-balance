@@ -3,4 +3,4 @@
 set -e
 
 cd "$(resolve-symbolic-link "$(which auto-white-balance)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/auto-white-balance.sh
+"$(git rev-parse --show-toplevel)"/music-management/src/auto-white-balance
