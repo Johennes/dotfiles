@@ -7,7 +7,7 @@
 	ps = push
 	s = status
 	ud = log ..@{u}
-	ugtr = !git remote set-url origin $(git config remote.origin.url | sed 's|://[^@]*@|://|' | sed \"s|://|://$GITEA_ACCESS_TOKEN@|\")
+	ugtr = !git remote set-url origin $(git config remote.origin.url | sed 's|://[^@]*@|://|' | sed \"s|://|://$GITEA_ACCESS_TOKEN@|\") $@
 [pull]
 	rebase = true
 [push]
