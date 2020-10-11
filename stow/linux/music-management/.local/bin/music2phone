@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+cd "$(resolve-symbolic-link "$(which music2phone)" | xargs dirname)"
+"$(git rev-parse --show-toplevel)"/music-management/src/music2phone
