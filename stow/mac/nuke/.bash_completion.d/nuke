@@ -1,1 +1,1 @@
-complete -W "derived-data provisioning-profiles screenshots trash" nuke
+complete -W "brew-cache carthage-cache derived-data provisioning-profiles screenshots trash unavailable-simulators xcode-download-cache" nuke

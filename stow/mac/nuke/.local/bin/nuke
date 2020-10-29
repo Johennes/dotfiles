@@ -1,17 +1,170 @@
 #!/bin/bash
 
+# Generic helpers
+
+function announce_noop {
+    echo "There's nothing to nuke!"
+}
+
+function announce_nuked {
+    echo "Nuked it!"
+}
+
+function exit_abort {
+    echo "Aborting"
+    exit 0
+}
+
+function count_files {
+    local files=0
+    for target in "$@"; do
+        if [[ ! -e "$target" ]]; then
+            continue
+        fi
+        local target_files=$(find "$target" -type f | wc -l | tr -d ' ')
+        files=$(($files + $target_files))
+    done
+    echo $files
+}
+
+function get_size {
+    local size=0
+    for target in "$@"; do
+        if [[ ! -e "$target" ]]; then
+            continue
+        fi
+        local target_size=$(get_kb_size "$target")
+        size=$(($size + $target_size))
+    done
+    echo $size
+}
+
+function get_kb_size {
+    du -cks "$@" | tail -n1 | cut -d$'\t' -f1
+}
+
+function nuke_targets {
+    if [[ $# -eq 0 ]]; then
+        announce_noop
+        return
+    fi
+    echo "Analyzing $# target(s)..."
+    local files=$(count_files "$@")
+    local size=$(get_size "$@")
+    if [[ $files -eq 0 ]]; then
+        announce_noop
+        return
+    fi
+    local human_size=$(numfmt --to=iec-i --suffix=B $((1024 * $size)))
+    echo -e "\033[0;31mYou are about to nuke $files files ($human_size). Continue? [y/n]\033[0m"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        for target in "$@"; do
+            rm -rf "$target"
+        done
+        announce_nuked
+    else
+        exit_abort
+    fi
+}
+
+# Specific nukers
+
+function nuke_brew_cache {
+    echo -e "\033[0;31mDo you want to run brew cleanup? [y/n]\033[0m"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        brew cleanup -s -q > /dev/null 2>&1
+        announce_nuked
+    else
+        exit_abort
+    fi
+    echo "Checking remaining cache..."
+    nuke_targets "$(brew --cache)"
+}
+
+function nuke_carthage_cache {
+    nuke_targets ~/Library/Caches/org.carthage.CarthageKit
+}
+
+function nuke_derived_data {
+    nuke_targets ~/Library/Developer/Xcode/DerivedData
+}
+
+function nuke_provisioning_profiles {
+    nuke_targets ~/Library/MobileDevice/Provisioning\ Profiles/*
+}
+
+function nuke_screenshots {
+    local targets=()
+    while read -r target; do
+        targets+=("$target")
+    done < <(find ~/Desktop \( -name "Screenshot*.png" -o -name "Simulator Screen Shot*.png" \))
+    nuke_targets "${targets[@]}"
+}
+
+function nuke_trash {
+    nuke_targets ~/.Trash/*
+}
+
+function nuke_unavailable_simulators {
+    local devices=$(xcrun simctl list devices | grep unavailable | grep -oE '([A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12})')
+    if [[ -z $devices ]]; then
+        announce_noop
+        return
+    fi
+    local count=$(echo "$devices" | wc -l | tr -d ' ')
+    echo "Analyzing $count target(s)..."
+    local folders=()
+    for device in $devices; do
+        folders+=(~/Library/Developer/CoreSimulator/Devices/$device)
+    done
+    local files=$(count_files "${folders[@]}")
+    local size=$(get_size "${folders[@]}")
+    local human_size=$(numfmt --to=iec-i --suffix=B $((1024 * $size)))
+    echo -e "\033[0;31mYou are about to nuke $count unavailable devices ($human_size in $files files). Continue? [y/n]\033[0m"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        xcrun simctl delete unavailable
+        announce_nuked
+    else
+      exit_abort
+    fi
+}
+
+function nuke_xcode_download_cache {
+    nuke_targets ~/Library/Caches/com.apple.dt.Xcode/Downloads
+}
+
+# Main
+
 case "$1" in
+    brew-cache)
+        nuke_brew_cache
+        ;;
+    carthage-cache)
+        nuke_carthage_cache
+        ;;
     derived-data)
-        rm -rf ~/Library/Developer/Xcode/DerivedData
+        nuke_derived_data
         ;;
     provisioning-profiles)
-        rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*
+        nuke_provisioning_profiles
         ;;
     screenshots)
-        find ~/Desktop \( -name "Screenshot*" -o -name "Simulator Screen Shot*" \) -exec rm -f "{}" \;
+        nuke_screenshots
         ;;
     trash)
-        [[ -d ~/.Trash ]] && rm -rf ~/.Trash/*
+        nuke_trash
+        ;;
+    unavailable-simulators)
+        nuke_unavailable_simulators
+        ;;
+    xcode-download-cache)
+        nuke_xcode_download_cache
         ;;
     *)
         echo "Nothing to nuke! (╯°□°)╯︵┻━┻"
