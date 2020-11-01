@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+cd "$(resolve-symbolic-link "$(which gitig)" | xargs dirname)"
+"$(git rev-parse --show-toplevel)"/gitig/gitig
