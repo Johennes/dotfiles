@@ -2,5 +2,8 @@
 
 set -e
 
-cd "$(resolve-symbolic-link "$(which music2phone)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/music2phone
+pushd cd "$(resolve-symbolic-link "$(which music2phone)" | xargs dirname)" > /dev/null
+root="$(git rev-parse --show-toplevel)"
+popd > /dev/null
+
+"$root/music-management/src/music2phone" "$@"

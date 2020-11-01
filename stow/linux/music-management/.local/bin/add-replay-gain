@@ -2,5 +2,8 @@
 
 set -e
 
-cd "$(resolve-symbolic-link "$(which add-replay-gain)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/add-replay-gain
+pushd "$(resolve-symbolic-link "$(which add-replay-gain)" | xargs dirname)" > /dev/null
+root="$(git rev-parse --show-toplevel)"
+popd > /dev/null
+
+"$root/music-management/src/add-replay-gain" "$@"

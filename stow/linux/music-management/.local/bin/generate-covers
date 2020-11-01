@@ -2,5 +2,8 @@
 
 set -e
 
-cd "$(resolve-symbolic-link "$(which generate-covers)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/generate-covers
+pushd "$(resolve-symbolic-link "$(which generate-covers)" | xargs dirname)" > /dev/null
+root="$(git rev-parse --show-toplevel)"
+popd > /dev/null
+
+"$root/music-management/src/generate-covers" "$@"

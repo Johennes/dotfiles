@@ -2,5 +2,8 @@
 
 set -e
 
-cd "$(resolve-symbolic-link "$(which gitig)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/gitig/gitig
+pushd "$(resolve-symbolic-link "$(which gitig)" | xargs dirname)" > /dev/null
+root="$(git rev-parse --show-toplevel)"
+popd > /dev/null
+
+"$root/gitig/gitig" "$@"

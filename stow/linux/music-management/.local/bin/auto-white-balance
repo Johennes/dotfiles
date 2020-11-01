@@ -2,5 +2,8 @@
 
 set -e
 
-cd "$(resolve-symbolic-link "$(which auto-white-balance)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/auto-white-balance
+pushd "$(resolve-symbolic-link "$(which auto-white-balance)" | xargs dirname)" > /dev/null
+root="$(git rev-parse --show-toplevel)"
+popd > /dev/null
+
+"$root/music-management/src/auto-white-balance" "$@"

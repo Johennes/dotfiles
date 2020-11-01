@@ -2,5 +2,8 @@
 
 set -e
 
-cd "$(resolve-symbolic-link "$(which tif2jpg)" | xargs dirname)"
-"$(git rev-parse --show-toplevel)"/music-management/src/tif2jpg
+pushd "$(resolve-symbolic-link "$(which tif2jpg)" | xargs dirname)" > /dev/null
+root="$(git rev-parse --show-toplevel)"
+popd > /dev/null
+
+"$root/music-management/src/tif2jpg" "$@"
