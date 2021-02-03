@@ -1,12 +1,12 @@
 [[ -s "$HOME/.profile" ]] && . "$HOME/.profile" # Load the default .profile
 
+alias fork="/Applications/Fork.app/Contents/MacOS/Fork > /dev/null 2>&1 &"
+
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 export PATH=~/.local/bin:${PATH}
-export PATH="/usr/local/opt/ruby/bin:$PATH"
 export PATH=$(python3 -c "import site; print(site.USER_BASE)")/bin:${PATH}
-export PATH=$(ruby -e "puts Gem.user_dir")/bin:${PATH}
 export PATH=${PATH}:/usr/local/go/bin
 
 export PIPENV_VENV_IN_PROJECT=1
@@ -27,3 +27,5 @@ done
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
 [[ -f ~/.bash_profile_local ]] && . ~/.bash_profile_local
+
+eval "$(rbenv init -)"
