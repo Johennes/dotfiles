@@ -329,16 +329,18 @@ you should place your code here."
     (with-eval-after-load 'org
       ;; Org directory & capture file
       (setq org-directory "~/Notes")
-      (setq org-default-notes-file (concat org-directory "/inbox.org"))
+      (setq org-default-notes-file (concat org-directory "/_inbox.org"))
       ;; Todos
       (setq org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE")))
       (setq org-log-done nil)
       ;; Refiling
       (setq org-refile-targets
-        '(("projects.org" :maxlevel . 3)
-          ("someday.org" :level . 1)))
+        '(("_projects.org" :maxlevel . 3)
+          ("_someday.org" :level . 1)))
       (setq org-refile-allow-creating-parent-nodes (quote confirm))
       (setq org-refile-use-outline-path 'file)
+      ;; Agenda
+      (setq org-agenda-files (directory-files-recursively org-directory "\.org$"))
       ;; Replace org-set-tags with org-set-tags-command in keybinding
       ;; https://emacs.stackexchange.com/a/50316
       (spacemacs/set-leader-keys-for-major-mode 'org-mode ":" 'org-set-tags-command)
@@ -355,7 +357,7 @@ you should place your code here."
           org-level-5))
         (set-face-attribute face nil :height 1.0)))
     ;; Initial windows
-    (find-file "~/Notes/projects.org")
+    (find-file "~/Notes/_projects.org")
     (neotree-show)
   )
 
