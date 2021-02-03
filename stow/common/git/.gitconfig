@@ -1,6 +1,10 @@
 [alias]
+	a = add
+	aa = add --all
 	c = checkout
+	co = commit
 	cp = cherry-pick
+	df = diff
 	f = fetch
 	l = log --graph --decorate
 	pl = pull -p
