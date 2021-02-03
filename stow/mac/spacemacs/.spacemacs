@@ -323,7 +323,8 @@ you should place your code here."
       (customize-set-variable 'helm-boring-file-regexp-list (cons "\\.org_archive$" helm-boring-file-regexp-list)))
     ;; Neotree
     (with-eval-after-load 'neotree
-      (setq neo-show-hidden-files nil))
+      (setq neo-show-hidden-files nil)
+      (setq neo-hidden-regexp-list '("^\\." "\\.pyc$" "~$" "^#.*#$" "\\.elc$" "\\.org_archive$")))
     ;; Org-mode
     (with-eval-after-load 'org
       ;; Org directory & capture file
