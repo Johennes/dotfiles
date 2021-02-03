@@ -317,6 +317,10 @@ you should place your code here."
     (setq default-frame-alist '((width . 200) (height . 50)))
     ;; Text editing
     (setq evil-move-beyond-eol t)
+    ;; Helm
+    (with-eval-after-load 'helm
+      (setq helm-ff-skip-boring-files t)
+      (customize-set-variable 'helm-boring-file-regexp-list (cons "\\.org_archive$" helm-boring-file-regexp-list)))
     ;; Neotree
     (with-eval-after-load 'neotree
       (setq neo-show-hidden-files nil))
