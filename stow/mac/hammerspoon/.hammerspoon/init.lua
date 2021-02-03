@@ -99,14 +99,13 @@ hs.hotkey.bind(hyper, "i", function()
   hs.application.launchOrFocus("iTerm")
 end)
 
-hs.hotkey.bind(hyper, "f", function()
-  hs.application.launchOrFocus("Firefox")
+hs.hotkey.bind(hyper, "m", function()
+  hs.application.launchOrFocus("Emacs")
 end)
 
-hs.hotkey.bind(hyper, "s", function()
-  hs.application.launchOrFocus("Slack")
-end)
+-- Zettlr Shortcuts
 
-hs.hotkey.bind(hyper, "x", function()
-  hs.application.launchOrFocus("Xcode")
+hs.hotkey.bind(hyper, "t", function()
+  local date = os.date("%Y-%m-%d %a")
+  hs.eventtap.keyStrokes(date)
 end)
