@@ -359,6 +359,7 @@ you should place your code here."
     ;; Initial windows
     (find-file "~/Notes/_projects.org")
     (neotree-show)
+    (winum-select-window-1)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
