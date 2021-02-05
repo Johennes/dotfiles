@@ -344,8 +344,10 @@ you should place your code here."
       ;; Replace org-set-tags with org-set-tags-command in keybinding
       ;; https://emacs.stackexchange.com/a/50316
       (spacemacs/set-leader-keys-for-major-mode 'org-mode ":" 'org-set-tags-command)
-      ;; Set section symbol
+      ;; Section symbol
       (setq org-bullets-bullet-list '("§"))
+      ;; Preserve single blank line after folding subtree
+      (setq org-cycle-separator-lines 1)
       ;; Prevent headings from being sized up
       (dolist
         (face '(
