@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [[ ! -d "$REVIEW_DRIVE" ]]; then
+if [[ -z "$REVIEW_DRIVE" ]]; then
     echo "Error: REVIEW_DRIVE environment variable not set"
     exit 1
 fi
 
-if [[ ! -d "$REVIEW_WIKI" ]]; then
+if [[ -z "$REVIEW_WIKI" ]]; then
     echo "Error: REVIEW_WIKI environment variable not set"
     exit 1
 fi
