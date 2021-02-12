@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "The next public review takes place Wednesday, ... at 3:30pm CET."
+echo
+echo "*Agenda*"
+echo
+echo "- @dev: ... (MOB-...)"
+echo
+echo "*Calendar event*"
+echo
+echo "..."
+echo
+echo "For further details see https://wiki.runwaynine.com/x/iEpMCg."
