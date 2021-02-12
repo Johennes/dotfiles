@@ -1,6 +1,16 @@
 #!/bin/bash
 
-echo "The next public review takes place Wednesday, ... at 3:30pm CET."
+if [[ ! -d "$REVIEW_DRIVE" ]]; then
+    echo "Error: REVIEW_DRIVE environment variable not set"
+    exit 1
+fi
+
+if [[ ! -d "$REVIEW_WIKI" ]]; then
+    echo "Error: REVIEW_WIKI environment variable not set"
+    exit 1
+fi
+
+echo "The next public iOS review takes place Wednesday, ... at 3:30pm CET."
 echo
 echo "*Agenda*"
 echo
@@ -10,4 +20,6 @@ echo "*Calendar event*"
 echo
 echo "..."
 echo
-echo "For further details see https://wiki.runwaynine.com/x/iEpMCg."
+echo "Slides and recordings are made available in Google Drive after the meeting ($REVIEW_DRIVE)."
+echo
+echo "For further details see $REVIEW_WIKI."
