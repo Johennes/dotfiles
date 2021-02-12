@@ -80,20 +80,20 @@ function group_release_notes {
     done
 }
 
-echo "@channel: Version x.x.x of the iOS app began rolling out in phases on the app store starting with KAYAK."
+echo "Version x.x.x of the iOS app began rolling out in phases on the app store starting with KAYAK."
 echo
-echo "*Official Release Notes*"
+echo "*Official release notes*"
 echo
 echo "$(group_release_notes)"
 echo
-echo "*Other Noteworthy Changes*"
+echo "*Noteworthy changes*"
 echo
-echo "-"
+echo "- ... (@dev), XP: \`...\`, CC @pm"
 echo
-echo "*Special Thanks*"
+echo "*Not part of the app but still noteworthy*"
 echo
-echo "- @..."
+echo "- ... (@dev)"
 echo
-echo "As usual, thanks to everyone else who helped make this release happen as well!"
+echo "As usual, thanks to everyone who helped make this release happen!"
 echo
 echo "This release was brought to you by our current _Release Captain_ @...! :shipitparrot:"
