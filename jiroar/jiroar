@@ -53,6 +53,13 @@ class Configuration(object):
             else:
                 self.ignored_keys = project["ignore"]
 
+            if "sync_project" not in config:
+                raise Exception("No sync_project section in configuration")
+            sync_project = config["sync_project"]
+
+            if "key" not in sync_project:
+                raise Exception("No sync_project.key setting in configuration")
+            self.sync_project_key = sync_project["key"]
 
             if "sprints" not in board:
                 raise Exception("No board.sprints section in configuration")
@@ -190,15 +197,15 @@ class JiraClient(NetworkClient):
         response = self.get(f"/rest/api/2/project/{self.project_key}/version?startAt={start}&maxResults={count}")
         return response.json()
 
-    def create_version(self, name, start_date, submission_date):
-        print(f"Creating version {name} ({start_date} – {submission_date})...")
+    def create_version(self, project_key, name, start_date, submission_date):
+        print(f"Creating version {name} ({start_date} – {submission_date}) in project {project_key}...")
         response = self.post("/rest/api/2/version",
             json = {
                 "name": name,
                 "description": f"Submission scheduled for {submission_date}",
                 "startDate": start_date,
                 "releaseDate": submission_date,
-                "project": self.project_key
+                "project": project_key
             })
         link = response.json()["self"]
         print(f"New version: {link}")
@@ -580,7 +587,8 @@ class CreateVersionAction(object):
 
         name = "iOS %i" % (int(last_version_string) + 1)
 
-        self.client.create_version(name, start_date_str, release_date_str)
+        self.client.create_version(self.configuration.project_key, name, start_date_str, release_date_str)
+        self.client.create_version(self.configuration.sync_project_key, name, start_date_str, release_date_str)
 
 
 # Input / Output Helpers
