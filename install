@@ -34,7 +34,7 @@ function stow_one {
 
 # Multiple packages will link into ~/.local/bin so we have to make sure it exists or
 # else the first one will occupy it and all others will fail
-[[ ! -d "~/.local/bin" ]] && mkdir -pv "~/.local/bin"
+[[ ! -d "~/.local/bin" ]] && mkdir -pv ~/.local/bin
 
 root=$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" > /dev/null 2>&1 \
     && git rev-parse --show-toplevel)
