@@ -1,6 +1,3 @@
 [submodule "music-management"]
 	path = music-management
-	url = https://nosuchdomain.mooo.com/git/doc/music-management
-[submodule "gitig"]
-	path = gitig
-	url = https://nosuchdomain.mooo.com/git/doc/gitig
+	url = https://github.com/Johennes/music-management
