@@ -116,8 +116,14 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# set up nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 # add custom executables in ~/.local/bin to PATH
 export PATH=~/.local/bin:$PATH
 
 # source private file
 [[ -s ~/.bashrc_local ]] && . ~/.bashrc_local
+
