@@ -1,31 +1,33 @@
-[[ -s "$HOME/.profile" ]] && . "$HOME/.profile" # Load the default .profile
+# Homebrew
+export HOMEBREW_PREFIX="/usr/local";
+export HOMEBREW_CELLAR="${HOMEBREW_PREFIX}/Cellar";
+export HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}";
+export PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin${PATH+:$PATH}";
+export MANPATH="${HOMEBREW_PREFIX}/share/man${MANPATH+:$MANPATH}:";
+export INFOPATH="${HOMEBREW_PREFIX}/share/info:${INFOPATH:-}";
 
-alias fork="/Applications/Fork.app/Contents/MacOS/Fork > /dev/null 2>&1 &"
+# Ruby (via brew)
+#export PATH="${HOMEBREW_PREFIX}/opt/ruby/bin:$PATH"
+#export PATH="${HOMEBREW_PREFIX}/lib/ruby/gems/3.0.0/bin:$PATH"
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+# Ruby (system)
+export GEM_HOME=$HOME/.gem
+export PATH=$GEM_HOME/bin:$PATH
 
-export PATH=~/.local/bin:${PATH}
-export PATH=$(python3 -c "import site; print(site.USER_BASE)")/bin:${PATH}
-export PATH=${PATH}:/usr/local/go/bin
+# Python
+export PATH=$(python3 -c "import site; print(site.USER_BASE)")/bin:$PATH
 
-export PIPENV_VENV_IN_PROJECT=1
-export RUBYOPT='-W0'
+# VSCode
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
-powerline_root=$(pip3 show powerline-status | grep 'Location:' | sed 's/Location: //')
-if [[ ! -z ${powerline_root} ]]; then
-    powerline-daemon -q
-    POWERLINE_BASH_CONTINUATION=1
-    POWERLINE_BASH_SELECT=1
-    . ${powerline_root}/powerline/bindings/bash/powerline.sh
-fi
-
+# Bash completion
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 for file in ~/.bash_completion.d/*; do
     [[ -f "${file}" ]] && . "${file}"
 done
 
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+# User binaries
+export PATH=~/.local/bin:$PATH
 
+# Source private file
 [[ -f ~/.bash_profile_local ]] && . ~/.bash_profile_local
-
-eval "$(rbenv init -)"
