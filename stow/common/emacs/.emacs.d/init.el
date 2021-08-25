@@ -79,9 +79,8 @@
 ;; Org > Roam
 
 (use-package org-roam
-  :init
-  (setq org-roam-v2-ack t)
   :custom
+  (setq org-roam-v2-ack t)
   (org-roam-directory my--notes-home)
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
