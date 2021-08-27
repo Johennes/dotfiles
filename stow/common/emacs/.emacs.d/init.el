@@ -60,17 +60,24 @@
 
 ;; Org
 
+(setq org-directory my--notes-home)
+(setq org-default-notes-file (concat org-directory "/inbox.org"))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file org-default-notes-file) "* TODO %?")))
+
+(setq org-agenda-files (directory-files-recursively my--notes-home "\.org$"))
 (setq org-agenda-custom-commands
       '(("u" "Reading list" todo "UNREAD"
          ((org-agenda-prefix-format " %i ")))))
-(setq org-agenda-files (directory-files-recursively my--notes-home "\.org$"))
+
 (setq org-auto-align-tags t)
 (setq org-complete-tags-always-offer-all-agenda-tags t)
+(setq org-tags-column 0)
+
 (setq org-cycle-separator-lines 1) ;; Preserve single blank line after folding subtree
-(setq org-directory my--notes-home)
 (setq org-log-done t)
 (setq org-startup-with-inline-images t)
-(setq org-tags-column 0)
 (setq org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE")))
 
 (remove-hook 'org-cycle-hook 'org-cycle-hide-drawers) ;; Expand drawers when cycling
@@ -132,6 +139,7 @@
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
+(global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c l") 'org-store-link)
 
