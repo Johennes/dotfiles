@@ -156,25 +156,9 @@
 (setq default-frame-alist '((width . 120) (height . 35)))
 (setq initial-buffer-choice "~/Notes/inbox.org")
 
-
-
-
-
-
-
-
-
-
-
 ;; TODO see if any of the stuff below is still needed
 
-;; Require needed!!
-;;(require 'org-id)
-;;(setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-
 ;;(with-eval-after-load 'org
-;;      ;; Org directory & capture file
-;;      (setq org-default-notes-file (concat org-directory "/_inbox.org"))
 ;;      ;; Refiling
 ;;      (setq org-refile-targets
 ;;        '(("_projects.org" :maxlevel . 3)
