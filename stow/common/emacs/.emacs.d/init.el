@@ -135,6 +135,13 @@
          :unnarrowed t)))
 
 
+;; Which-key
+
+(use-package which-key
+  :config
+  (setq which-key-idle-delay 0.05)
+  (which-key-mode))
+
 ;; Keybindings
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -142,11 +149,6 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c l") 'org-store-link)
-
-;;(global-set-key (kbd "C-c n c") 'org-roam-capture)
-;;(global-set-key (kbd "C-c n f") 'org-roam-node-find)
-;;(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
-;;(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
 
 
 ;; Initial frame
@@ -189,4 +191,3 @@
 ;;          org-level-4
 ;;          org-level-5))
 ;;        (set-face-attribute face nil :height 1.0))
-
