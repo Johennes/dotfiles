@@ -120,6 +120,10 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# use vim as the default editor (e.g. for git)
+export VISUAL=vim
+export EDITOR="$VISUAL"
+
 # set up nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
